@@ -1,0 +1,15 @@
+{
+  "id": "679a9732-95df-46c1-98a4-886c2042e308",
+  "build_number": 4,
+  "job_name": "My Mixed Language Project",
+  "status": "ERROR",
+  "start_time": "2025-05-11T19:51:04.485885+00:00",
+  "end_time": "2025-05-11T19:51:04.549741+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": "Failed to dispatch job payload to agent linux_agent_1 after allocating executor: [Errno 111] Connection refused",
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

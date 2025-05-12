@@ -1,0 +1,26 @@
+{
+  "id": "0c78e13c-d5a1-4ee6-a2b1-02505e89f21f",
+  "build_number": 8,
+  "job_name": "My Mixed Language Project",
+  "status": "SUCCESS",
+  "start_time": "2025-05-11T20:49:57.743572+00:00",
+  "end_time": "2025-05-11T20:49:58.845713+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [
+    {
+      "name": "python_generated_file",
+      "path": "My Mixed Language Project/0c78e13c-d5a1-4ee6-a2b1-02505e89f21f/python_generated_file"
+    }
+  ],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": [
+    {
+      "name": "python_generated_file",
+      "path_on_agent": "/home/cducak/pyforge_agent_artifacts_store/My Mixed Language Project/0c78e13c-d5a1-4ee6-a2b1-02505e89f21f/python_generated_file",
+      "server_path": "My Mixed Language Project/0c78e13c-d5a1-4ee6-a2b1-02505e89f21f/python_generated_file"
+    }
+  ]
+}

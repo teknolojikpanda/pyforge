@@ -1,0 +1,42 @@
+{
+  "id": "79db7e6a-2a7b-4817-89a1-4ff72fd6d745",
+  "build_number": 4,
+  "job_name": "Variable Passing Test",
+  "status": "PENDING",
+  "start_time": "2025-05-12T16:07:17.232543+00:00",
+  "end_time": null,
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": null,
+  "agent_artifact_paths": [],
+  "step_details": [
+    {
+      "name": "Step 1 - Set Vars",
+      "language": "python",
+      "status": "PENDING",
+      "start_time": null,
+      "end_time": null,
+      "error_message": null
+    },
+    {
+      "name": "Step 2 - Use and Modify Vars",
+      "language": "shell",
+      "status": "PENDING",
+      "start_time": null,
+      "end_time": null,
+      "error_message": null
+    },
+    {
+      "name": "Step 3 - Verify Vars",
+      "language": "python",
+      "status": "PENDING",
+      "start_time": null,
+      "end_time": null,
+      "error_message": null
+    }
+  ],
+  "shared_data": {}
+}

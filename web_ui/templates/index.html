@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}All Jobs - PyForge CI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Available Jobs</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <!-- Future buttons like "Create Job" could go here -->
+    </div>
+</div>
+
+{% if jobs %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for job in jobs %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{{ url_for('job_detail', job_name=job.name) }}" class="text-decoration-none">{{ job.name }}</a>
+                    </h5>
+                    <p class="card-text text-muted small">{{ job.description or 'No description provided.' }}</p>
+                    {% if job.agent %}
+                        <p class="card-text"><small class="text-muted">Runs on Agent: {{ job.agent.name }}</small></p>
+                    {% else %}
+                        <p class="card-text"><small class="text-muted">Runs Locally</small></p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                     <form action="{{ url_for('trigger_job_build', job_name=job.name) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-primary">▶️ Run Job</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        No jobs are currently configured. Add job YAML files to your `jobs_config` directory.
+    </div>
+{% endif %}
+{% endblock %}

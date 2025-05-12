@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Agent Details - {{ agent_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if agent %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">
+            Agent: {{ agent.name }}
+            {% if agent.status == 'ONLINE' %}
+                <span class="badge bg-success ms-2 fs-6">Online</span>
+            {% elif agent.status == 'OFFLINE' %}
+                <span class="badge bg-danger ms-2 fs-6">Offline</span>
+            {% elif agent.status == 'BUSY' %}
+                <span class="badge bg-warning ms-2 fs-6">Busy</span>
+            {% else %}
+                <span class="badge bg-secondary ms-2 fs-6">{{ agent.status | upper }}</span>
+            {% endif %}
+        </h2>
+        <a href="{{ url_for('list_agents_view') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Back to Agents List
+        </a>
+    </div>
+    <hr>
+
+    <div class="row">
+        <!-- Sol Sütun: Temel Bilgiler ve Executorlar -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>General Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">ID</dt>
+                        <dd class="col-sm-8">{{ agent.id }}</dd>
+
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">{{ agent.address }}:{{ agent.port }}</dd>
+
+                        <dt class="col-sm-4">Registered At</dt>
+                        <dd class="col-sm-8">{{ agent.registration_time.strftime('%Y-%m-%d %H:%M:%S UTC') if agent.registration_time else 'N/A' }}</dd>
+
+                        <dt class="col-sm-4">Last Seen</dt>
+                        <dd class="col-sm-8">{{ agent.last_seen.strftime('%Y-%m-%d %H:%M:%S UTC') if agent.last_seen else 'N/A' }}</dd>
+
+                        <dt class="col-sm-4">Connection Status</dt>
+                        <dd class="col-sm-8">
+                            {% if agent.connection_status == "Reachable" %}
+                                <span class="badge bg-success">{{ agent.connection_status }}</span>
+                            {% elif agent.connection_status and ("Unreachable" in agent.connection_status or "Error" in agent.connection_status) %}
+                                <span class="badge bg-danger">{{ agent.connection_status }}</span>
+                            {% elif agent.connection_status and "Unhealthy" in agent.connection_status %}
+                                 <span class="badge bg-warning">{{ agent.connection_status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ agent.connection_status | default('Unknown') }}</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-cpu-fill me-2"></i>Executors</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Max Executors</dt>
+                        <dd class="col-sm-7">{{ agent['max_executors'] }}</dd>
+
+                        <dt class="col-sm-5">Current Executors Used</dt>
+                        <dd class="col-sm-7">{{ agent['current_executors_used'] }}</dd>
+                        
+                        <dt class="col-sm-5">Available Executors</dt>
+                        <dd class="col-sm-7">{{ agent['max_executors'] - agent['current_executors_used'] }}</dd>
+                    </dl>
+                    <!-- Jenkins'teki gibi detaylı executor listesi için gelecekte burası genişletilebilir -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Sütun: Yetenekler ve Sistem Bilgisi -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-tags-fill me-2"></i>Capabilities (Labels)</h5>
+                </div>
+                <div class="card-body">
+                    {% if agent.supported_capabilities %}
+                        {% for cap in agent.supported_capabilities %}
+                            <span class="badge bg-primary me-1 mb-1 p-2">{{ cap }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No capabilities defined.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if agent.system_info %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-hdd-stack-fill me-2"></i>System Information</h5>
+                </div>
+                <div class="card-body">
+                     <pre class="bg-light p-2 rounded small"><code>{{ agent.system_info | tojson(indent=2) }}</code></pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- CLI'dan Gelen Detaylı Bilgiler (Jenkins'teki "Monitoring" veya "System Properties" gibi) -->
+    {% if cli_info_error or parsed_cli_agent_info %}
+    <div class="card mt-1 mb-4"> <!-- mt-1 to reduce space if previous row ends cleanly -->
+        <div class="card-header">
+            <h5><i class="bi bi-terminal-fill me-2"></i>Advanced Information (from CLI)</h5>
+        </div>
+        <div class="card-body">
+            {% if cli_info_error %}
+                <div class="alert alert-warning" role="alert">
+                    <h6 class="alert-heading">Could not retrieve detailed CLI information:</h6>
+                    <pre class="mb-0 small">{{ cli_info_error }}</pre>
+                </div>
+            {% elif parsed_cli_agent_info %}
+                <p class="fst-italic"><small>Raw data from: <code>python3 cli.py agent info {{ agent_name }}</code></small></p>
+                <pre class="bg-dark text-light p-3 rounded small"><code>{{ parsed_cli_agent_info | tojson(indent=2) }}</code></pre>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        Agent '{{ agent_name }}' not found.
+    </div>
+    <a href="{{ url_for('list_agents_view') }}" class="btn btn-secondary mt-3">Back to Agents List</a>
+    {% endif %}
+</div>
+{% endblock %}

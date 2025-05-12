@@ -1,0 +1,14 @@
+{
+  "id": "320cfc13-19a3-49c1-910c-cb9540152ddd",
+  "job_name": "My Agent-Based Project",
+  "status": "ERROR",
+  "start_time": "2025-05-11T18:16:07.266922+00:00",
+  "end_time": "2025-05-11T18:16:07.323844+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": "Failed to dispatch build 320cfc13-19a3-49c1-910c-cb9540152ddd to agent linux_agent_1: [Errno 111] Connection refused",
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

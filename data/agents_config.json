@@ -1,0 +1,14 @@
+[
+  {
+    "name": "linux_agent_1",
+    "address": "http://localhost:8081",
+    "tags": ["linux", "docker"],
+    "max_executors": 2
+  },
+  {
+    "name": "windows_builder",
+    "address": "http://192.168.1.105:8081",
+    "tags": ["windows", "msbuild"],
+    "max_executors": 2
+  }
+]

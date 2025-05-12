@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Build #{{ build.build_number }} - {{ job_name }} - PyForge CI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Build #{{ build.build_number }} <small class="text-muted">({{ job_name }})</small></h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+             <a href="{{ url_for('job_detail', job_name=job_name) }}" class="btn btn-sm btn-outline-secondary">&laquo; Back to Job</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Build Summary</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Status:
+                        <span class="badge 
+                            {% if build.status == 'SUCCESS' %}bg-success-subtle
+                            {% elif build.status in ['FAILURE', 'ERROR'] %}bg-danger-subtle
+                            {% elif build.status in ['RUNNING', 'DISPATCHING', 'WAITING_FOR_AGENT', 'WAITING_FOR_AGENT_EXECUTOR'] %}bg-info-subtle
+                            {% elif build.status == 'PENDING' %}bg-secondary-subtle
+                            {% elif build.status == 'CANCELLED' %}bg-warning-subtle
+                            {% else %}bg-light text-dark
+                            {% endif %}">
+                            {{ build.status }}
+                        </span>
+                    </li>
+                    <li class="list-group-item"><strong>Build ID:</strong> <small><code>{{ build.id }}</code></small></li>
+                    <li class="list-group-item"><strong>Triggered By:</strong> {{ build.triggered_by }}</li>
+                    <li class="list-group-item"><strong>Started:</strong> {{ (build.start_time | to_datetime).strftime('%Y-%m-%d %H:%M:%S %Z') if build.start_time and (build.start_time | to_datetime) else 'N/A' }}</li>
+                    <li class="list-group-item"><strong>Ended:</strong> {{ (build.end_time | to_datetime).strftime('%Y-%m-%d %H:%M:%S %Z') if build.end_time and (build.end_time | to_datetime) else 'N/A' }}</li>
+                    <li class="list-group-item"><strong>Duration:</strong> 
+                        {% set start = build.start_time | to_datetime %}
+                        {% set end = build.end_time | to_datetime %}
+                        {% if start and end %}
+                            {{ (end - start).total_seconds() | round(1) }}s
+                        {% elif start and build.status in ['RUNNING', 'DISPATCHING', 'WAITING_FOR_AGENT', 'WAITING_FOR_AGENT_EXECUTOR'] %}
+                            Ongoing...
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item"><strong>SCM Commit:</strong> <small><code>{{ build.scm_commit_hash or 'N/A' }}</code></small></li>
+                    {% if build.agent_name %}
+                    <li class="list-group-item"><strong>Agent Name:</strong> {{ build.agent_name }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            {% if build.error_message %}
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Build Error</h4>
+                <p>{{ build.error_message }}</p>
+            </div>
+            {% endif %}
+
+            {% if build.artifact_paths or build.agent_artifact_paths %}
+            <div class="card mb-3">
+                <div class="card-header">Artifacts</div>
+                <ul class="list-group list-group-flush">
+                    {% for artifact_item in build.artifact_paths %} {# Server-side/local artifacts #}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('serve_artifact', artifact_path=artifact_item.path) }}">{{ artifact_item.name }}</a>
+                            <small class="text-muted d-block">Path: {{ artifact_item.path }}</small>
+                        </li>
+                    {% endfor %}
+                    {% for artifact_item in build.agent_artifact_paths %} {# Agent-uploaded artifacts #}
+                         <li class="list-group-item">
+                            <a href="{{ url_for('serve_artifact', artifact_path=artifact_item.server_path) }}">{{ artifact_item.name }}</a>
+                            <small class="text-muted d-block">Agent Path: {{ artifact_item.path_on_agent }}</small>
+                            <small class="text-muted d-block">Server Path: {{ artifact_item.server_path }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <div class="alert alert-light small" role="alert">
+                No artifacts recorded for this build.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <h3 class="mt-4">Build Log</h3>
+    <div class="build-log">
+        <code>{{ log_content }}</code>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const logContainer = document.querySelector('.build-log code');
+        const buildId = "{{ build.id }}";
+        const jobName = "{{ job_name }}";
+        // Calculate initial offset based on the length of the initially rendered log content
+        // Ensure log_content is not None before getting its length
+        let initialLogContent = {{ log_content|tojson }}; // Pass as JSON string to handle special chars
+        let currentOffset = initialLogContent ? new TextEncoder().encode(initialLogContent).length : 0;
+        let buildStatus = "{{ build.status }}";
+
+        const terminalStatuses = ["SUCCESS", "FAILURE", "ERROR", "CANCELLED"];
+
+        function fetchLogUpdates() {
+            if (terminalStatuses.includes(buildStatus)) {
+                console.log("Build finished (" + buildStatus + "), stopping log polling.");
+                return;
+            }
+
+            fetch(`/api/job/${encodeURIComponent(jobName)}/build/${buildId}/log_update?offset=${currentOffset}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.log_delta && data.log_delta.length > 0) {
+                        const newContent = document.createTextNode(data.log_delta);
+                        logContainer.appendChild(newContent);
+                        logContainer.parentElement.scrollTop = logContainer.parentElement.scrollHeight;
+                    }
+                    currentOffset = data.new_offset;
+                    buildStatus = data.status; // Update status from server
+
+                    if (!terminalStatuses.includes(buildStatus)) {
+                        setTimeout(fetchLogUpdates, 3000); // Poll again after 3 seconds
+                    } else {
+                        console.log("Build finished (" + buildStatus + "), final log update received.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching log updates:', error);
+                    if (!terminalStatuses.includes(buildStatus)) {
+                         setTimeout(fetchLogUpdates, 5000); // Retry after a longer delay on error
+                    }
+                });
+        }
+
+        if (!terminalStatuses.includes(buildStatus)) {
+            setTimeout(fetchLogUpdates, 1000); // Start polling shortly after page load
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+  "job_id": "31f9027f-68d1-4706-afe9-6393fb903171",
+  "job_name": "My Awesome Project",
+  "build_number": 1,
+  "id": "db9f62d0-d533-4d6a-83b3-5a9eff0f7c91",
+  "status": "PENDING",
+  "start_time": null,
+  "end_time": null,
+  "triggered_by": "cli",
+  "commit_hash": null,
+  "logs": [],
+  "workspace_path": null,
+  "artifact_paths": {}
+}

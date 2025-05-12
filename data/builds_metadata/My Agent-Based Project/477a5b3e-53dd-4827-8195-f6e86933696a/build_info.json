@@ -1,0 +1,25 @@
+{
+  "id": "477a5b3e-53dd-4827-8195-f6e86933696a",
+  "job_name": "My Agent-Based Project",
+  "status": "SUCCESS",
+  "start_time": "2025-05-11T18:56:46.139212+00:00",
+  "end_time": "2025-05-11T18:56:47.032773+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [
+    {
+      "name": "build_output_log",
+      "path": "My Agent-Based Project/477a5b3e-53dd-4827-8195-f6e86933696a/build_output_log"
+    }
+  ],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": [
+    {
+      "name": "build_output_log",
+      "path_on_agent": "/home/cducak/pyforge_agent_artifacts_store/My Agent-Based Project/477a5b3e-53dd-4827-8195-f6e86933696a/build_output_log",
+      "server_path": "My Agent-Based Project/477a5b3e-53dd-4827-8195-f6e86933696a/build_output_log"
+    }
+  ]
+}

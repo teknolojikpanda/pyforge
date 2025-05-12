@@ -1,0 +1,42 @@
+job:
+  name: Variable Passing Test
+  environment: # Job-level
+    JOB_LEVEL_VAR: "JobScope"
+  steps:
+    - name: Step 1 - Set Vars
+      language: python
+      environment: # Step-level
+        STEP_1_VAR: "Step1Scope"
+      script: |
+        import os
+        print(f"Accessing job level var: {os.environ.get('JOB_LEVEL_VAR')}")
+        print(f"Accessing step 1 var: {os.environ.get('STEP_1_VAR')}")
+        
+        with open("pyforge_output_vars.env", "w") as f:
+            f.write("FROM_STEP_1=Value From Python Step 1\n")
+            f.write("SHARED_COUNTER=1\n")
+        print("Step 1 finished, set FROM_STEP_1 and SHARED_COUNTER")
+
+    - name: Step 2 - Use and Modify Vars
+      language: shell
+      script: |
+        echo "Step 2 received JOB_LEVEL_VAR: $JOB_LEVEL_VAR"
+        echo "Step 2 received STEP_1_VAR (should be empty as it's from another step's scope): $STEP_1_VAR"
+        echo "Step 2 received FROM_STEP_1: $FROM_STEP_1"
+        echo "Step 2 received SHARED_COUNTER: $SHARED_COUNTER"
+        
+        # Modify SHARED_COUNTER
+        NEW_COUNT=$(($SHARED_COUNTER + 1))
+        echo "SHARED_COUNTER=$NEW_COUNT" > pyforge_output_vars.env
+        echo "FROM_STEP_2=Value From Shell Step 2" >> pyforge_output_vars.env
+        echo "Step 2 finished, modified SHARED_COUNTER and set FROM_STEP_2"
+
+    - name: Step 3 - Verify Vars
+      language: python
+      script: |
+        import os
+        print("Step 3 verification:")
+        print(f"  JOB_LEVEL_VAR: {os.environ.get('JOB_LEVEL_VAR')}")
+        print(f"  FROM_STEP_1: {os.environ.get('FROM_STEP_1')}")
+        print(f"  FROM_STEP_2: {os.environ.get('FROM_STEP_2')}")
+        print(f"  SHARED_COUNTER: {os.environ.get('SHARED_COUNTER')}") # Should be 2

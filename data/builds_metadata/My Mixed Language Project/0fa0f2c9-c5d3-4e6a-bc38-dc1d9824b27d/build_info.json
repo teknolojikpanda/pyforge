@@ -1,0 +1,15 @@
+{
+  "id": "0fa0f2c9-c5d3-4e6a-bc38-dc1d9824b27d",
+  "build_number": 3,
+  "job_name": "My Mixed Language Project",
+  "status": "FAILURE",
+  "start_time": "2025-05-11T19:44:07.191579+00:00",
+  "end_time": "2025-05-11T19:44:08.042672+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": "One or more build steps failed.",
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% macro stage_badge_class(status) %}
+    {% if status == 'SUCCESS' %}bg-success-subtle text-success-emphasis
+    {% elif status in ['FAILURE', 'ERROR'] %}bg-danger-subtle text-danger-emphasis
+    {% elif status == 'RUNNING' %}bg-info-subtle text-info-emphasis
+    {% elif status == 'PENDING' %}bg-secondary-subtle text-secondary-emphasis
+    {% elif status == 'SKIPPED' %}bg-light text-dark border
+    {% else %}bg-secondary-subtle text-secondary-emphasis
+    {% endif %}
+{% endmacro %}
+
+{% macro stage_card_border_class(status) %}
+    {% if status == 'SUCCESS' %}border-success
+    {% elif status in ['FAILURE', 'ERROR'] %}border-danger
+    {% elif status == 'RUNNING' %}border-info
+    {% else %}border-secondary{% endif %}
+{% endmacro %}
+
+{% block title %}Job: {{ job.name }} - PyForge CI{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Job: {{ job.name }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <form action="{{ url_for('trigger_job_build', job_name=job.name) }}" method="post">
+                <button type="submit" class="btn btn-success">▶️ Run Job</button>
+            </form>
+        </div>
+    </div>
+
+    <p><strong>Description:</strong> {{ job.description or 'N/A' }}</p>
+
+    {% if job.scm %}
+    <div class="card mb-3">
+        <div class="card-header">SCM Configuration</div>
+        <div class="card-body">
+            <p class="card-text mb-1"><strong>Type:</strong> {{ job.scm.type }}</p>
+            <p class="card-text mb-1"><strong>URL:</strong> <a href="{{ job.scm.url }}" target="_blank">{{ job.scm.url }}</a></p>
+            <p class="card-text mb-0"><strong>Branch:</strong> {{ job.scm.branch }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if job.agent %}
+    <div class="card mb-3">
+        <div class="card-header">Agent Configuration</div>
+        <div class="card-body">
+            <p class="card-text mb-1"><strong>Agent Name:</strong> {{ job.agent.name }}</p>
+            <p class="card-text mb-1"><strong>Connect Timeout:</strong> {{ job.agent.connect_timeout if job.agent.connect_timeout is not none else 'Default' }} seconds</p>
+            <p class="card-text mb-0"><strong>Executor Wait Timeout:</strong> {{ job.agent.executor_wait_timeout if job.agent.executor_wait_timeout is not none else 'Default' }} seconds</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info small" role="alert">
+        This job runs locally on the PyForge server.
+    </div>
+    {% endif %}
+
+    <div class="accordion mb-3" id="jobConfigAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSteps">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSteps" aria-expanded="false" aria-controls="collapseSteps">
+                    Job Steps
+                </button>
+            </h2>
+            <div id="collapseSteps" class="accordion-collapse collapse" aria-labelledby="headingSteps" data-bs-parent="#jobConfigAccordion">
+                <div class="accordion-body">
+                    {% if job.steps %}
+                        <ul class="list-group">
+                            {% for step in job.steps %}
+                                <li class="list-group-item">
+                                    <strong>{{ step.name }}</strong> <span class="badge bg-secondary">{{ step.language or 'shell' }}</span>
+                                    <pre class="build-log mt-2 p-2"><code class="text-light small">{{ step.script }}</code></pre>
+                                    {% if step.working_directory %}
+                                        <small class="text-muted d-block mt-1">Working Directory: <code>{{ step.working_directory }}</code></small>
+                                    {% endif %}
+                                    {% if step.environment %}
+                                        <small class="text-muted d-block mt-1">Environment: <code>{{ step.environment|tojson }}</code></small>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No steps defined for this job.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingRawConfig">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRawConfig" aria-expanded="false" aria-controls="collapseRawConfig">
+                    Raw Job Configuration (YAML)
+                </button>
+            </h2>
+            <div id="collapseRawConfig" class="accordion-collapse collapse" aria-labelledby="headingRawConfig" data-bs-parent="#jobConfigAccordion">
+                <div class="accordion-body">
+                    <pre class="build-log"><code>{{ job.raw_config | tojson(indent=2) }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Build History</h3>
+    {% if builds %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Build ID</th>
+                    <th>Status</th>
+                    <th>Triggered By</th>
+                    <th>Started</th>
+                    <th>Duration</th>
+                    <th>SCM Commit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for build_item in builds %} {# build_item is a dictionary from Build.to_dict() #}
+                <tr class="build-summary-row">
+                    <td><a href="{{ url_for('build_detail', job_name=job.name, build_id=build_item.id) }}">#{{ build_item.build_number }}</a></td>
+                    <td><a href="{{ url_for('build_detail', job_name=job.name, build_id=build_item.id) }}">{{ build_item.id[:8] }}...</a></td>
+                    <td>
+                        <span class="badge 
+                            {% if build_item.status == 'SUCCESS' %}bg-success-subtle
+                            {% elif build_item.status in ['FAILURE', 'ERROR'] %}bg-danger-subtle
+                            {% elif build_item.status in ['RUNNING', 'DISPATCHING', 'WAITING_FOR_AGENT', 'WAITING_FOR_AGENT_EXECUTOR'] %}bg-info-subtle
+                            {% elif build_item.status == 'PENDING' %}bg-secondary-subtle
+                            {% elif build_item.status == 'CANCELLED' %}bg-warning-subtle
+                            {% else %}badge-light
+                            {% endif %}">
+                            {{ build_item.status }}
+                        </span>
+                    </td>
+                    <td>{{ build_item.triggered_by }}</td>
+                    <td>
+                        <small>{{ (build_item.start_time | to_datetime).strftime('%Y-%m-%d %H:%M:%S %Z') if build_item.start_time and (build_item.start_time | to_datetime) else 'N/A' }}</small>
+                    </td>
+                    <td>
+                        {% set start = build_item.start_time | to_datetime %}
+                        {% set end = build_item.end_time | to_datetime %}
+                        {% if start and end %}
+                            <small>{{ (end - start).total_seconds() | round(1) }}s</small>
+                        {% elif start and build_item.status in ['RUNNING', 'DISPATCHING', 'WAITING_FOR_AGENT', 'WAITING_FOR_AGENT_EXECUTOR'] %}
+                            <small>Ongoing...</small>
+                        {% else %}
+                            <small>N/A</small>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ build_item.scm_commit_hash[:7] if build_item.scm_commit_hash else 'N/A' }}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary py-0 px-1 stages-toggle-button" type="button" data-bs-toggle="collapse" data-bs-target="#stages-{{ build_item.id }}" aria-expanded="false" aria-controls="stages-{{ build_item.id }}">
+                            Stages ▼
+                        </button>
+                    </td>
+                </tr>
+                <tr class="collapse" id="stages-{{ build_item.id }}">
+                    <td colspan="8" class="p-0">
+                        <div class="stage-details-container p-3 bg-light border-top">
+                            <h6 class="mb-2">Build #{{ build_item.build_number }} Stages:</h6>
+                            {% if build_item.step_details %}
+                            <div class="row g-2">
+                                {% for step in build_item.step_details %}
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+                                    <div class="card h-100 shadow-sm stage-card {{ stage_card_border_class(step.status) }}">
+                                        <div class="card-body p-2">
+                                            <p class="card-title fw-bold mb-1"><small>{{ step.name }} ({{step.language}})</small></p>
+                                            <p class="card-text mb-1"><small>Status: <span class="badge {{ stage_badge_class(step.status) }}">{{ step.status }}</span></small></p>
+                                            <p class="card-text mb-0 stage-time"
+                                               data-status="{{ step.status }}"
+                                               data-start-time="{{ step.start_time if step.start_time else '' }}"
+                                               data-end-time="{{ step.end_time if step.end_time else '' }}">
+                                                <small>
+                                                {% if step.status == 'SUCCESS' or step.status == 'FAILURE' or step.status == 'ERROR' %}
+                                                    {% set s_start = step.start_time | to_datetime %}
+                                                    {% set s_end = step.end_time | to_datetime %}
+                                                    {% if s_start and s_end %}
+                                                        Duration: {{ (s_end - s_start).total_seconds() | round(1) }}s
+                                                    {% else %}
+                                                        Time: N/A
+                                                    {% endif %}
+                                                {% elif step.status == 'RUNNING' and step.start_time %}
+                                                    Running for: <span class="live-timer">calculating...</span>
+                                                {% elif step.status == 'PENDING' or step.status == 'SKIPPED' %}
+                                                    Time: N/A
+                                                {% else %}
+                                                    Time: N/A
+                                                {% endif %}
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p><small class="text-muted">No stage data available for this build.</small></p>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No build history for this job yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function formatDuration(seconds) {
+    if (isNaN(seconds) || seconds < 0) {
+        return "N/A";
+    }
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    let str = "";
+    if (h > 0) str += h + "h ";
+    if (m > 0 || h > 0) str += m + "m "; // Show minutes if hours are present or minutes > 0
+    str += s + "s";
+    return str.trim();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const runningStageTimeElements = document.querySelectorAll('.stage-time[data-status="RUNNING"]');
+
+    // Prevent row collapse when clicking on links within the summary row
+    document.querySelectorAll('.build-summary-row a').forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.stopPropagation(); // Stop the click from bubbling up to the row
+        });
+    });
+    // Note: The button itself will still toggle due to data-bs-toggle,
+    // which is the desired behavior for the button.
+    // If you wanted the row to be clickable *except* for links, you'd need more complex JS.
+    // But for now, only the button toggles.
+    runningStageTimeElements.forEach(el => {
+        const startTimeStr = el.dataset.startTime;
+        const liveTimerSpan = el.querySelector('.live-timer');
+
+        if (startTimeStr && liveTimerSpan) {
+            const startTime = new Date(startTimeStr);
+
+            function updateTimer() {
+                if (el.dataset.status !== "RUNNING") { // Check if status changed (e.g. by log polling update)
+                    // Potentially re-render this part if full build object is updated via JS
+                    return; 
+                }
+                const now = new Date();
+                const diffSeconds = Math.round((now - startTime) / 1000);
+                liveTimerSpan.textContent = formatDuration(diffSeconds);
+            }
+
+            updateTimer(); // Initial call
+            const intervalId = setInterval(updateTimer, 1000);
+            el.dataset.intervalId = intervalId; // Store interval ID if we need to clear it later
+        }
+    });
+});
+</script>
+{% endblock %}

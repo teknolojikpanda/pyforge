@@ -1,0 +1,15 @@
+{
+  "id": "0acc6dc2-65c1-467c-ae9b-d9c5f32eb8ff",
+  "build_number": 7,
+  "job_name": "My Agent-Based Project",
+  "status": "WAITING_FOR_AGENT_EXECUTOR",
+  "start_time": "2025-05-11T19:27:55.715217+00:00",
+  "end_time": null,
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": "No free executors on agent linux_agent_1. Waiting...",
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

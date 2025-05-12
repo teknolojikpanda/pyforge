@@ -1,0 +1,14 @@
+{
+  "id": "e99b785c-f193-4be4-90a9-a7f8b04cec00",
+  "job_name": "My Agent-Based Project",
+  "status": "ERROR",
+  "start_time": "2025-05-11T18:40:56.326044+00:00",
+  "end_time": "2025-05-11T18:40:56.336982+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": "Failed to dispatch build e99b785c-f193-4be4-90a9-a7f8b04cec00 to agent linux_agent_1: httpx.Timeout must either include a default, or set all four parameters explicitly.",
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

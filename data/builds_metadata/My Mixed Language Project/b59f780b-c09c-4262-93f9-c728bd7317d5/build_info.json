@@ -1,0 +1,60 @@
+{
+  "id": "b59f780b-c09c-4262-93f9-c728bd7317d5",
+  "build_number": 10,
+  "job_name": "My Mixed Language Project",
+  "status": "SUCCESS",
+  "start_time": "2025-05-11T21:03:50.979909+00:00",
+  "end_time": "2025-05-11T21:03:57.050055+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [
+    {
+      "name": "python_generated_file",
+      "path": "My Mixed Language Project/b59f780b-c09c-4262-93f9-c728bd7317d5/python_generated_file"
+    }
+  ],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": [
+    {
+      "name": "python_generated_file",
+      "path_on_agent": "/home/cducak/pyforge_agent_artifacts_store/My Mixed Language Project/b59f780b-c09c-4262-93f9-c728bd7317d5/python_generated_file",
+      "server_path": "My Mixed Language Project/b59f780b-c09c-4262-93f9-c728bd7317d5/python_generated_file"
+    }
+  ],
+  "step_details": [
+    {
+      "name": "Run Shell Command",
+      "language": "shell",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:03:51.955275+00:00",
+      "end_time": "2025-05-11T21:03:51.969994+00:00",
+      "error_message": null
+    },
+    {
+      "name": "Run Python Script",
+      "language": "python",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:03:51.970009+00:00",
+      "end_time": "2025-05-11T21:03:51.991972+00:00",
+      "error_message": null
+    },
+    {
+      "name": "Another Shell Command",
+      "language": "shell",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:03:51.991981+00:00",
+      "end_time": "2025-05-11T21:03:52.007110+00:00",
+      "error_message": null
+    },
+    {
+      "name": "Sleep for 5 seconds",
+      "language": "shell",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:03:52.007117+00:00",
+      "end_time": "2025-05-11T21:03:57.017276+00:00",
+      "error_message": null
+    }
+  ]
+}

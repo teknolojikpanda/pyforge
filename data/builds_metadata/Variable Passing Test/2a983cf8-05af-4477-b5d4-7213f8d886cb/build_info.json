@@ -1,0 +1,46 @@
+{
+  "id": "2a983cf8-05af-4477-b5d4-7213f8d886cb",
+  "build_number": 1,
+  "job_name": "Variable Passing Test",
+  "status": "SUCCESS",
+  "start_time": "2025-05-11T21:26:35.782986+00:00",
+  "end_time": "2025-05-11T21:26:36.064451+00:00",
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": [],
+  "step_details": [
+    {
+      "name": "Step 1 - Set Vars",
+      "language": "python",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:26:35.991227+00:00",
+      "end_time": "2025-05-11T21:26:36.016134+00:00",
+      "error_message": null
+    },
+    {
+      "name": "Step 2 - Use and Modify Vars",
+      "language": "shell",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:26:36.016143+00:00",
+      "end_time": "2025-05-11T21:26:36.030579+00:00",
+      "error_message": null
+    },
+    {
+      "name": "Step 3 - Verify Vars",
+      "language": "python",
+      "status": "SUCCESS",
+      "start_time": "2025-05-11T21:26:36.030588+00:00",
+      "end_time": "2025-05-11T21:26:36.052059+00:00",
+      "error_message": null
+    }
+  ],
+  "shared_data": {
+    "FROM_STEP_1": "Value From Python Step 1",
+    "SHARED_COUNTER": "2",
+    "FROM_STEP_2": "Value From Shell Step 2"
+  }
+}

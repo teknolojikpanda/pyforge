@@ -1,0 +1,15 @@
+{
+  "id": "0460a88a-6a83-4d87-b418-cc2624c98251",
+  "build_number": 1,
+  "job_name": "My Agent-Based Project",
+  "status": "WAITING_FOR_AGENT",
+  "start_time": "2025-05-11T19:08:05.388676+00:00",
+  "end_time": null,
+  "triggered_by": "web_ui",
+  "scm_commit_hash": null,
+  "error_message": null,
+  "log_file_path": null,
+  "artifact_paths": [],
+  "agent_name": "linux_agent_1",
+  "agent_artifact_paths": []
+}

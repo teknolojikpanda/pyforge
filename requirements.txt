@@ -1,0 +1,7 @@
+PyYAML
+GitPython
+Flask  # or FastAPI, if you prefer
+schedule # For polling SCM
+psutil # For process management, resource monitoring (optional)
+coloredlogs # For nicer console logs
+httpx
