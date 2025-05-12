@@ -110,5 +110,8 @@ logs/
 
 # PyForge specific (if any, like local agent data if not already handled)
 # agents.json # If this is meant to be dynamically generated and not versioned
-# pyforge_engine/workspaces/ # If workspaces are created locally and shouldn't be versioned
-# pyforge_engine/artifacts/ # If artifacts are stored locally and shouldn't be versioned
+data/artifacts/
+data/build_logs/
+data/builds/
+data/builds_metadata/
+data/workspaces/
